@@ -1,7 +1,7 @@
 export function JSONDecycle(object: any, replacer: any) {
   "use strict";
 
-  var objects = new WeakMap(); // object to path mappings
+  var objects = new WeakMap();
 
   return (function derez(value, path) {
     var old_path;
