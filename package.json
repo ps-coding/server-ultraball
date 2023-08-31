@@ -1,0 +1,21 @@
+{
+  "name": "server-ultraball",
+  "version": "1.0.0",
+  "description": "The server for ultraball",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ultraball",
+    "server"
+  ],
+  "author": "ps-coding <prasham31@gmail.com> (https://shahprasham.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "@types/ws": "^8.5.5",
+    "typescript": "^5.2.2",
+    "ws": "^8.13.0"
+  }
+}
