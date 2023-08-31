@@ -2,7 +2,7 @@
   "name": "server-ultraball",
   "version": "1.0.0",
   "description": "The server for ultraball",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
