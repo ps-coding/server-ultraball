@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 
-import { JSONDecycle, JSONRetrocycle } from "./cycle.js";
+import { JSONDecycle } from "./cycle.js";
 
 export class Game {
   id: number;
@@ -22,10 +22,6 @@ export class Game {
 
   static generateId() {
     return Math.floor(Math.random() * 1000000);
-  }
-
-  static interpretBroadcast(data: any) {
-    return JSON.parse(JSONRetrocycle(data));
   }
 
   constructor(id: number, host: Player, cap: number) {
@@ -394,55 +390,6 @@ export class Game {
         player.socket.send(str);
       }
     }
-  }
-
-  // TODO: Decide if I need this
-  outputStatus() {
-    let output = "MOVES:\n";
-
-    for (const player of this.players) {
-      if (player.move) {
-        output +=
-          player.name +
-          " used " +
-          player.move?.action.title +
-          direction(player) +
-          ".\n";
-      }
-    }
-
-    output += "\n";
-
-    function direction(player: Player) {
-      if (player.move?.action.dir == "one") {
-        return " against " + player.move?.direction?.name;
-      } else if (player.move?.action.dir == "self") {
-        return " on itself";
-      } else {
-        return " against everyone";
-      }
-    }
-
-    output += "RELOADS FOR ALIVE PLAYERS:\n";
-    for (const player of this.players) {
-      if (!player.isDead) {
-        output +=
-          player.name +
-          " has " +
-          player.reloads.knife +
-          " knife reload(s), " +
-          player.reloads.ball +
-          " ball reload(s), " +
-          player.reloads.bazooka +
-          " bazooka reload(s), and " +
-          player.reloads.spiral +
-          " spiral reload(s).\n";
-      }
-    }
-
-    output += "\n\n";
-
-    return output;
   }
 }
 
