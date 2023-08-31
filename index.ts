@@ -20,7 +20,8 @@ wss.on("connection", (ws) => {
             payload.cap &&
             typeof payload.cap == "number" &&
             payload.cap > 1
-          )
+          ) ||
+          wsGame
         )
           break;
 
@@ -53,7 +54,8 @@ wss.on("connection", (ws) => {
             typeof payload.name == "string" &&
             payload.gameId &&
             typeof payload.gameId == "number"
-          )
+          ) ||
+          wsGame
         )
           break;
 
