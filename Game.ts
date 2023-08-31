@@ -9,6 +9,7 @@ export class Game {
   cap: number;
   gameStarted = false;
   gameEnded = false;
+  movesDone = 0;
 
   private loadingMoves: {
     playerId: number;
@@ -88,10 +89,12 @@ export class Game {
       this.loadingMoves = this.loadingMoves.filter(
         (a) => a.playerId != playerId
       );
+      this.movesDone = this.loadingMoves.length;
 
       if (this.loadingMoves.length == this.players.length) {
         this.move();
         this.loadingMoves = [];
+        this.movesDone = 0;
       }
 
       return;
@@ -108,10 +111,12 @@ export class Game {
     });
 
     this.loadingMoves = this.loadingMoves.filter((a) => a.playerId != playerId);
+    this.movesDone = this.loadingMoves.length;
 
     if (this.loadingMoves.length == this.players.length) {
       this.move();
       this.loadingMoves = [];
+      this.movesDone = 0;
     }
   }
 
@@ -126,10 +131,7 @@ export class Game {
 
     this.move();
     this.loadingMoves = [];
-  }
-
-  isLoading() {
-    return this.loadingMoves.length > 0;
+    this.movesDone = 0;
   }
 
   load(action: {
@@ -152,12 +154,14 @@ export class Game {
       return;
 
     this.loadingMoves.push(action);
+    this.movesDone = this.loadingMoves.length;
 
     this.broadcast("player-loaded", { loadedPlayerId: action.playerId });
 
     if (this.loadingMoves.length == this.players.length) {
       this.move();
       this.loadingMoves = [];
+      this.movesDone = 0;
     }
   }
 
