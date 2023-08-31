@@ -370,11 +370,9 @@ export class Game {
   }
 
   private end(reason: string) {
+    this.broadcast("game-ended", { reason });
     for (const player of this.players) {
-      player.socket.close(
-        1000,
-        JSON.stringify({ type: "game-end", payload: { reason, game: this } })
-      );
+      player.socket.close(1000);
     }
 
     this.gameEnded = true;
