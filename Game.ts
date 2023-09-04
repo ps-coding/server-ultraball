@@ -76,7 +76,10 @@ export class Game {
     }
 
     if (this.isHost(socket)) {
-      if (this.host.id == playerId) return;
+      if (this.host.id == playerId) {
+        this.end("host-left");
+        return;
+      }
 
       if (this.players.filter((p) => p.id == playerId).length != 1) return;
 
