@@ -9,7 +9,7 @@ export class Game {
   cap: number;
   gameStarted = false;
   gameEnded = false;
-  movesDone = 0;
+  playersMoved: number[] = [];
 
   private loadingMoves: {
     playerId: number;
@@ -92,12 +92,12 @@ export class Game {
       this.loadingMoves = this.loadingMoves.filter(
         (a) => a.playerId != playerId
       );
-      this.movesDone = this.loadingMoves.length;
+      this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
       if (this.loadingMoves.length == this.players.length) {
         this.move();
         this.loadingMoves = [];
-        this.movesDone = 0;
+        this.playersMoved = [];
       }
 
       return;
@@ -114,12 +114,12 @@ export class Game {
     });
 
     this.loadingMoves = this.loadingMoves.filter((a) => a.playerId != playerId);
-    this.movesDone = this.loadingMoves.length;
+    this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
     if (this.loadingMoves.length == this.players.length) {
       this.move();
       this.loadingMoves = [];
-      this.movesDone = 0;
+      this.playersMoved = [];
     }
   }
 
@@ -134,7 +134,7 @@ export class Game {
 
     this.move();
     this.loadingMoves = [];
-    this.movesDone = 0;
+    this.playersMoved = [];
   }
 
   load(action: {
@@ -157,14 +157,14 @@ export class Game {
       return;
 
     this.loadingMoves.push(action);
-    this.movesDone = this.loadingMoves.length;
+    this.playersMoved.push(action.playerId);
 
     this.broadcast("player-loaded", { loadedPlayerId: action.playerId });
 
     if (this.loadingMoves.length == this.players.length) {
       this.move();
       this.loadingMoves = [];
-      this.movesDone = 0;
+      this.playersMoved = [];
     }
   }
 
