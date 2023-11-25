@@ -95,7 +95,10 @@ export class Game {
       );
       this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
-      if (this.#loadingMoves.length == this.players.length) {
+      if (
+        this.#loadingMoves.length ==
+        this.players.filter((p) => !p.isDead).length
+      ) {
         this.move();
         this.#loadingMoves = [];
         this.playersMoved = [];
@@ -119,7 +122,9 @@ export class Game {
     );
     this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
-    if (this.#loadingMoves.length == this.players.length) {
+    if (
+      this.#loadingMoves.length == this.players.filter((p) => !p.isDead).length
+    ) {
       this.move();
       this.#loadingMoves = [];
       this.playersMoved = [];
@@ -164,7 +169,9 @@ export class Game {
 
     this.broadcast("player-loaded", { loadedPlayerId: action.playerId });
 
-    if (this.#loadingMoves.length == this.players.length) {
+    if (
+      this.#loadingMoves.length == this.players.filter((p) => !p.isDead).length
+    ) {
       this.move();
       this.#loadingMoves = [];
       this.playersMoved = [];
