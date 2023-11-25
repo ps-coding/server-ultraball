@@ -11,7 +11,7 @@ export class Game {
   gameEnded = false;
   playersMoved: number[] = [];
 
-  private loadingMoves: {
+  #loadingMoves: {
     playerId: number;
     moveId: (typeof moves)[number]["id"];
     direction?: number;
@@ -90,14 +90,14 @@ export class Game {
         removedPlayerId: playerId,
       });
 
-      this.loadingMoves = this.loadingMoves.filter(
+      this.#loadingMoves = this.#loadingMoves.filter(
         (a) => a.playerId != playerId
       );
       this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
-      if (this.loadingMoves.length == this.players.length) {
+      if (this.#loadingMoves.length == this.players.length) {
         this.move();
-        this.loadingMoves = [];
+        this.#loadingMoves = [];
         this.playersMoved = [];
       }
 
@@ -114,12 +114,14 @@ export class Game {
       removedPlayerId: playerId,
     });
 
-    this.loadingMoves = this.loadingMoves.filter((a) => a.playerId != playerId);
+    this.#loadingMoves = this.#loadingMoves.filter(
+      (a) => a.playerId != playerId
+    );
     this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
-    if (this.loadingMoves.length == this.players.length) {
+    if (this.#loadingMoves.length == this.players.length) {
       this.move();
-      this.loadingMoves = [];
+      this.#loadingMoves = [];
       this.playersMoved = [];
     }
   }
@@ -129,12 +131,12 @@ export class Game {
 
     if (!this.isHost(socket)) return;
 
-    if (this.loadingMoves.length == 0) return;
+    if (this.#loadingMoves.length == 0) return;
 
     this.broadcast("host-skipped", {});
 
     this.move();
-    this.loadingMoves = [];
+    this.#loadingMoves = [];
     this.playersMoved = [];
   }
 
@@ -154,23 +156,23 @@ export class Game {
 
     if (this.findPlayer(action.playerId, action.socket)?.isDead) return;
 
-    if (this.loadingMoves.filter((a) => a.playerId == action.playerId).length)
+    if (this.#loadingMoves.filter((a) => a.playerId == action.playerId).length)
       return;
 
-    this.loadingMoves.push(action);
+    this.#loadingMoves.push(action);
     this.playersMoved.push(action.playerId);
 
     this.broadcast("player-loaded", { loadedPlayerId: action.playerId });
 
-    if (this.loadingMoves.length == this.players.length) {
+    if (this.#loadingMoves.length == this.players.length) {
       this.move();
-      this.loadingMoves = [];
+      this.#loadingMoves = [];
       this.playersMoved = [];
     }
   }
 
   private move() {
-    const actions = this.loadingMoves;
+    const actions = this.#loadingMoves;
 
     for (const player of this.players) {
       if (player.isDead) {
