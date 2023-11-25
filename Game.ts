@@ -36,6 +36,7 @@ export class Game {
 
   hostStart(socket: WebSocket) {
     if (!this.isHost(socket)) return;
+    if (this.players.length < 2) return;
 
     this.start();
   }

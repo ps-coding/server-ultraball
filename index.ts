@@ -155,7 +155,7 @@ wss.on("connection", (ws) => {
             break;
 
           if (wsGame) {
-            wsGame.load({ ...payload, ws });
+            wsGame.load({ ...payload, socket: ws });
 
             if (wsGame.gameEnded) {
               games.splice(games.indexOf(wsGame), 1);
