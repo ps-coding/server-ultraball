@@ -142,7 +142,7 @@ wss.on("connection", (ws) => {
                   payload.using.every(
                     (item: any) =>
                       typeof item == "object" &&
-                      item.amount &&
+                      "amount" in item &&
                       typeof item.amount == "number" &&
                       item.edition &&
                       typeof item.edition == "string" &&
