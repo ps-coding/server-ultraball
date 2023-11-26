@@ -32,7 +32,7 @@ wss.on("connection", (ws) => {
             playerId = Player.generateId();
           }
 
-          const player = new Player(Player.generateId(), payload.name, ws);
+          const player = new Player(playerId, payload.name, ws);
 
           let gameId = Game.generateId();
           while (games.find((game) => game.id === gameId) || gameId === 0) {
