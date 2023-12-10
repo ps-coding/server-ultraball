@@ -468,7 +468,7 @@ export const moves = [
     title: "Shotgun",
     method: "offense",
     needs: null,
-    beats: ["spiralball"],
+    beats: ["knife", "spiralball"],
     dir: "one",
   },
   {
