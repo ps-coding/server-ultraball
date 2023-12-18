@@ -71,7 +71,10 @@ export class Game {
   }
 
   removePlayer(playerId: number, socket: WebSocket) {
-    if (this.players.length <= 2) {
+    if (
+      (this.players.length <= 2 && this.gameStarted) ||
+      this.players.length <= 1
+    ) {
       this.end("all-left");
       return;
     }
@@ -387,12 +390,13 @@ export class Game {
   }
 
   private end(reason: string) {
+    this.gameEnded = true;
+
     this.broadcast("game-ended", { reason });
+
     for (const player of this.players) {
       player.socket.close(1000);
     }
-
-    this.gameEnded = true;
   }
 
   broadcast(type: string, payload: any) {
