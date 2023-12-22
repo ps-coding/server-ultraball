@@ -36,7 +36,7 @@ export class Game {
 
   hostStart(socket: WebSocket) {
     if (!this.isHost(socket)) return;
-    if (this.players.length < 2) return;
+    if (this.players.filter((p) => !p.bot).length < 2) return;
 
     this.start();
   }
@@ -67,13 +67,24 @@ export class Game {
       return;
     this.players.push(player);
     this.broadcast("player-added", { newPlayerId: player.id });
-    if (this.players.length == this.cap) this.start();
+    if (this.players.filter((p) => !p.bot).length == this.cap) this.start();
+  }
+
+  addBot(socket: WebSocket, id: number) {
+    if (this.gameStarted) return;
+    if (!this.isHost(socket)) return;
+
+    const bot = new Bot(id);
+    this.players.push(bot);
+
+    this.broadcast("player-added", { newPlayerId: bot.id });
+    if (this.players.filter((p) => !p.bot).length == this.cap) this.start();
   }
 
   removePlayer(playerId: number, socket: WebSocket) {
     if (
-      (this.players.length <= 2 && this.gameStarted) ||
-      this.players.length <= 1
+      (this.players.filter((p) => !p.bot).length <= 2 && this.gameStarted) ||
+      this.players.filter((p) => !p.bot).length <= 1
     ) {
       this.end("all-left");
       return;
@@ -100,7 +111,7 @@ export class Game {
 
       if (
         this.#loadingMoves.length ==
-        this.players.filter((p) => !p.isDead).length
+        this.players.filter((p) => !p.isDead && !p.bot).length
       ) {
         this.move();
         this.#loadingMoves = [];
@@ -126,7 +137,8 @@ export class Game {
     this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
     if (
-      this.#loadingMoves.length == this.players.filter((p) => !p.isDead).length
+      this.#loadingMoves.length ==
+      this.players.filter((p) => !p.isDead && !p.bot).length
     ) {
       this.move();
       this.#loadingMoves = [];
@@ -173,7 +185,8 @@ export class Game {
     this.broadcast("player-loaded", { loadedPlayerId: action.playerId });
 
     if (
-      this.#loadingMoves.length == this.players.filter((p) => !p.isDead).length
+      this.#loadingMoves.length ==
+      this.players.filter((p) => !p.isDead && !p.bot).length
     ) {
       this.move();
       this.#loadingMoves = [];
@@ -184,7 +197,7 @@ export class Game {
   private move() {
     const actions = this.#loadingMoves;
 
-    for (const player of this.players) {
+    for (const player of this.players.filter((p) => !p.bot)) {
       if (player.isDead) {
         player.move = undefined;
         continue;
@@ -210,6 +223,15 @@ export class Game {
       } else {
         player.move = undefined;
       }
+    }
+
+    for (const bot of this.players.filter((p) => p.bot)) {
+      if (bot.isDead) {
+        bot.move = undefined;
+        continue;
+      }
+
+      (bot as Bot).chooseRandomMove(this.players);
     }
 
     this.update();
@@ -378,7 +400,7 @@ export class Game {
 
     this.broadcast("game-updated", {});
 
-    if (this.players.filter((p) => !p.isDead).length <= 1) {
+    if (this.players.filter((p) => !p.isDead && !p.bot).length <= 1) {
       this.end("all-dead");
     }
   }
@@ -394,13 +416,13 @@ export class Game {
 
     this.broadcast("game-ended", { reason });
 
-    for (const player of this.players) {
+    for (const player of this.players.filter((p) => !p.bot)) {
       player.socket.close(1000);
     }
   }
 
   broadcast(type: string, payload: any) {
-    for (const player of this.players) {
+    for (const player of this.players.filter((p) => !p.bot)) {
       if (player.socket) {
         const data = { type, payload: { ...payload, game: this } };
 
@@ -417,6 +439,7 @@ export class Player {
   socket: WebSocket;
   name: string;
   isDead = false;
+  readonly bot: boolean = false;
   move?: Move;
   reloads = {
     knife: 0,
@@ -433,6 +456,76 @@ export class Player {
     this.id = id;
     this.name = name;
     this.socket = server;
+  }
+}
+
+export class Bot extends Player {
+  id: number;
+  name: string;
+  isDead = false;
+  readonly bot = true;
+  move?: Move;
+  reloads = {
+    knife: 0,
+    ball: 0,
+    bazooka: 0,
+    spiral: 0,
+  };
+
+  static generateId() {
+    return Math.floor(Math.random() * 1000000);
+  }
+
+  constructor(id: number) {
+    super(id, "Bot #" + id, undefined as unknown as WebSocket);
+    this.id = id;
+    this.name = "Bot #" + id;
+  }
+
+  chooseRandomMove(players: Player[]) {
+    const availableMoves = this.getAvailableMoves();
+
+    const move =
+      availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
+    if (move.dir == "all" || move.dir == "self") {
+      this.move = new Move(move, {});
+    } else {
+      const direction = players.filter((p) => !p.isDead && p.id != this.id)[
+        Math.floor(Math.random() * players.length)
+      ];
+
+      this.move = new Move(move, { direction });
+    }
+  }
+
+  private getAvailableMoves() {
+    const availableMoves: (typeof moves)[number][] = [];
+
+    for (const move of moves) {
+      if (
+        !(
+          (move.method == "offense" &&
+            move.needs?.edition != "any" &&
+            !this.hasEnoughReloads(move.needs)) ||
+          (move.method == "offense" && move.needs?.edition == "any")
+        )
+      ) {
+        availableMoves.push(move);
+      }
+    }
+
+    return availableMoves;
+  }
+
+  private hasEnoughReloads(reload: any) {
+    if (!reload) return true;
+    if (
+      this.reloads[reload.edition as keyof typeof this.reloads] < reload.amount
+    ) {
+      return false;
+    }
+    return true;
   }
 }
 

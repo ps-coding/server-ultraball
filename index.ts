@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { Game, Player } from "./Game.js";
+import { Bot, Game, Player } from "./Game.js";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -73,6 +73,24 @@ wss.on("connection", (ws) => {
             const player = new Player(playerId, payload.name, ws);
             gameToJoin.addPlayer(player);
             wsGame = gameToJoin;
+
+            if (wsGame.gameEnded) {
+              games.splice(games.indexOf(wsGame), 1);
+            }
+          }
+
+          break;
+        case "add-bot":
+          if (wsGame) {
+            let botId = Bot.generateId();
+            while (
+              wsGame.players.find((player) => player.id === botId) ||
+              botId === 0
+            ) {
+              botId = Bot.generateId();
+            }
+
+            wsGame.addBot(ws, botId);
 
             if (wsGame.gameEnded) {
               games.splice(games.indexOf(wsGame), 1);
