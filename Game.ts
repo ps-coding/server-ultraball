@@ -499,9 +499,8 @@ export class Bot extends Player {
     if (move.dir == "all" || move.dir == "self") {
       this.move = new Move(move, {});
     } else {
-      const direction = players.filter((p) => !p.isDead && p.id != this.id)[
-        Math.floor(Math.random() * players.length)
-      ];
+      const options = players.filter((p) => !p.isDead && p.id != this.id);
+      const direction = options[Math.floor(Math.random() * options.length)];
 
       this.move = new Move(move, { direction });
     }
