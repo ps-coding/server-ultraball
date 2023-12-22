@@ -82,14 +82,6 @@ export class Game {
   }
 
   removePlayer(playerId: number, socket: WebSocket) {
-    if (
-      (this.players.filter((p) => !p.bot).length <= 2 && this.gameStarted) ||
-      this.players.filter((p) => !p.bot).length <= 1
-    ) {
-      this.end("all-left");
-      return;
-    }
-
     if (this.isHost(socket)) {
       if (this.host.id == playerId) {
         this.end("host-left");
@@ -103,6 +95,14 @@ export class Game {
         reason: "host-kicked",
         removedPlayerId: playerId,
       });
+
+      if (
+        (this.players.filter((p) => !p.bot).length <= 1 && this.gameStarted) ||
+        this.players.filter((p) => !p.bot).length <= 0
+      ) {
+        this.end("all-left");
+        return;
+      }
 
       this.#loadingMoves = this.#loadingMoves.filter(
         (a) => a.playerId != playerId
@@ -130,6 +130,14 @@ export class Game {
       reason: "left",
       removedPlayerId: playerId,
     });
+
+    if (
+      (this.players.filter((p) => !p.bot).length <= 1 && this.gameStarted) ||
+      this.players.filter((p) => !p.bot).length <= 0
+    ) {
+      this.end("all-left");
+      return;
+    }
 
     this.#loadingMoves = this.#loadingMoves.filter(
       (a) => a.playerId != playerId
