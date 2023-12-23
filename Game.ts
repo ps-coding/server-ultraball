@@ -306,8 +306,6 @@ export class Game {
       } else if (player.move.action.method == "offense") {
         if (player.move.action.dir == "all") {
           for (const pl of this.players.filter((p) => p.id != player.id)) {
-            if (pl.isDead) continue;
-
             if (!pl.move) {
               pl.isDead = true;
               continue;
@@ -356,8 +354,6 @@ export class Game {
           const pl = player.move.direction;
 
           if (!pl) continue;
-
-          if (pl.isDead) continue;
 
           if (!pl.move) {
             pl.isDead = true;
