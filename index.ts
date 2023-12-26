@@ -23,7 +23,7 @@ wss.on("connection", (ws) => {
               payload.cap > 0 &&
               payload.lastPlayerKeepsPlaying !== undefined &&
               typeof payload.lastPlayerKeepsPlaying == "boolean" &&
-              (payload.lastPlayerKeepsPlaying || payload.cap > 1)
+              (!payload.lastPlayerKeepsPlaying || payload.cap > 1)
             ) ||
             wsGame
           )
