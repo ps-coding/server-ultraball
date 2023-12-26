@@ -10,6 +10,7 @@ export class Game {
   gameStarted = false;
   gameEnded = false;
   playersMoved: number[] = [];
+  lastPlayerKeepsPlaying = false;
 
   #loadingMoves: {
     playerId: number;
@@ -25,18 +26,32 @@ export class Game {
     return Math.floor(Math.random() * 1000000);
   }
 
-  constructor(id: number, host: Player, cap: number) {
+  constructor(
+    id: number,
+    host: Player,
+    cap: number,
+    lastPlayerKeepsPlaying: boolean
+  ) {
     this.id = id;
     this.host = host;
     this.players = [host];
     this.cap = cap;
+    this.lastPlayerKeepsPlaying = lastPlayerKeepsPlaying;
 
     this.broadcast("game-created", {});
   }
 
   hostStart(socket: WebSocket) {
     if (!this.isHost(socket)) return;
-    if (this.players.filter((p) => !p.bot).length < 2) return;
+    if (
+      (!this.lastPlayerKeepsPlaying &&
+        this.players.filter((p) => !p.bot).length < 2) ||
+      this.players.filter((p) => !p.bot).length < 1 ||
+      (this.players.filter((p) => p.bot).length < 1 &&
+        this.players.filter((p) => !p.bot).length < 2) ||
+      this.gameStarted
+    )
+      return;
 
     this.start();
   }
@@ -65,9 +80,11 @@ export class Game {
         .length
     )
       return;
+    if (this.players.filter((p) => !p.bot).length == this.cap) return;
     this.players.push(player);
     this.broadcast("player-added", { newPlayerId: player.id });
-    if (this.players.filter((p) => !p.bot).length == this.cap) this.start();
+    if (this.players.filter((p) => !p.bot).length == this.cap && this.cap > 1)
+      this.start();
   }
 
   addBot(socket: WebSocket, id: number) {
@@ -78,12 +95,12 @@ export class Game {
     this.players.push(bot);
 
     this.broadcast("player-added", { newPlayerId: bot.id });
-    if (this.players.filter((p) => !p.bot).length == this.cap) this.start();
   }
 
   removePlayer(playerId: number, socket: WebSocket) {
     if (this.isHost(socket)) {
       if (this.host.id == playerId) {
+        this.players = this.players.filter((p) => p.id != playerId);
         this.end("host-left");
         return;
       }
@@ -97,8 +114,10 @@ export class Game {
       });
 
       if (
-        (this.players.filter((p) => !p.bot).length <= 1 && this.gameStarted) ||
-        this.players.filter((p) => !p.bot).length <= 0
+        (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
+          this.gameStarted &&
+          !this.lastPlayerKeepsPlaying) ||
+        this.players.filter((p) => !p.bot && !p.isDead).length <= 0
       ) {
         this.end("all-left");
         return;
@@ -132,8 +151,10 @@ export class Game {
     });
 
     if (
-      (this.players.filter((p) => !p.bot).length <= 1 && this.gameStarted) ||
-      this.players.filter((p) => !p.bot).length <= 0
+      (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
+        this.gameStarted &&
+        !this.lastPlayerKeepsPlaying) ||
+      this.players.filter((p) => !p.bot && !p.isDead).length <= 0
     ) {
       this.end("all-left");
       return;
@@ -404,7 +425,11 @@ export class Game {
 
     this.broadcast("game-updated", {});
 
-    if (this.players.filter((p) => !p.isDead && !p.bot).length <= 1) {
+    if (
+      this.players.filter((p) => !p.isDead && !p.bot).length < 1 ||
+      (this.players.filter((p) => !p.isDead && !p.bot).length < 2 &&
+        !this.lastPlayerKeepsPlaying)
+    ) {
       this.end("all-dead");
     }
   }
@@ -416,6 +441,8 @@ export class Game {
   }
 
   private end(reason: string) {
+    if (this.gameEnded) return;
+
     this.gameEnded = true;
 
     this.broadcast("game-ended", { reason });

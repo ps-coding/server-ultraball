@@ -20,7 +20,10 @@ wss.on("connection", (ws) => {
               typeof payload.name == "string" &&
               payload.cap &&
               typeof payload.cap == "number" &&
-              payload.cap > 1
+              payload.cap > 0 &&
+              payload.lastPlayerKeepsPlaying !== undefined &&
+              typeof payload.lastPlayerKeepsPlaying == "boolean" &&
+              (payload.lastPlayerKeepsPlaying || payload.cap > 1)
             ) ||
             wsGame
           )
@@ -39,7 +42,12 @@ wss.on("connection", (ws) => {
             gameId = Game.generateId();
           }
 
-          const game = new Game(gameId, player, payload.cap);
+          const game = new Game(
+            gameId,
+            player,
+            payload.cap,
+            payload.lastPlayerKeepsPlaying
+          );
           wsGame = game;
           games.push(game);
 
