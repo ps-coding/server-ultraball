@@ -10,7 +10,8 @@ export class Game {
   gameStarted = false;
   gameEnded = false;
   playersMoved: number[] = [];
-  lastPlayerKeepsPlaying = false;
+  lastPlayerKeepsPlaying: boolean;
+  isPublic: boolean;
 
   #loadingMoves: {
     playerId: number;
@@ -30,15 +31,37 @@ export class Game {
     id: number,
     host: Player,
     cap: number,
-    lastPlayerKeepsPlaying: boolean
+    lastPlayerKeepsPlaying: boolean,
+    isPublic: boolean
   ) {
     this.id = id;
     this.host = host;
     this.players = [host];
     this.cap = cap;
     this.lastPlayerKeepsPlaying = lastPlayerKeepsPlaying;
+    this.isPublic = isPublic;
 
     this.broadcast("game-created", {});
+    if (host.socket) {
+      const data = {
+        type: "player-id",
+        payload: { playerId: host.id, game: this },
+      };
+
+      const str = JSON.stringify(JSONDecycle(data, undefined));
+
+      host.socket.send(str);
+    }
+  }
+
+  searchable() {
+    return (
+      this.isPublic &&
+      !this.gameStarted &&
+      !this.gameEnded &&
+      this.players.filter((p) => !p.bot).length < this.cap &&
+      this.cap > 1
+    );
   }
 
   hostStart(socket: WebSocket) {
@@ -50,8 +73,9 @@ export class Game {
       (this.players.filter((p) => p.bot).length < 1 &&
         this.players.filter((p) => !p.bot).length < 2) ||
       this.gameStarted
-    )
+    ) {
       return;
+    }
 
     this.start();
   }
@@ -78,13 +102,26 @@ export class Game {
     if (
       this.players.filter((p) => p.id == player.id || p.socket == player.socket)
         .length
-    )
+    ) {
       return;
+    }
     if (this.players.filter((p) => !p.bot).length == this.cap) return;
     this.players.push(player);
+
+    if (player.socket) {
+      const data = {
+        type: "player-id",
+        payload: { playerId: player.id, game: this },
+      };
+
+      const str = JSON.stringify(JSONDecycle(data, undefined));
+
+      player.socket.send(str);
+    }
     this.broadcast("player-added", { newPlayerId: player.id });
-    if (this.players.filter((p) => !p.bot).length == this.cap && this.cap > 1)
+    if (this.players.filter((p) => !p.bot).length == this.cap && this.cap > 1) {
       this.start();
+    }
   }
 
   addBot(socket: WebSocket, id: number) {
@@ -207,8 +244,11 @@ export class Game {
 
     if (this.findPlayer(action.playerId, action.socket)?.isDead) return;
 
-    if (this.#loadingMoves.filter((a) => a.playerId == action.playerId).length)
+    if (
+      this.#loadingMoves.filter((a) => a.playerId == action.playerId).length
+    ) {
       return;
+    }
 
     this.#loadingMoves.push(action);
     this.playersMoved.push(action.playerId);

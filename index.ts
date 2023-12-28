@@ -23,11 +23,14 @@ wss.on("connection", (ws) => {
               payload.cap > 0 &&
               payload.lastPlayerKeepsPlaying !== undefined &&
               typeof payload.lastPlayerKeepsPlaying == "boolean" &&
-              (payload.lastPlayerKeepsPlaying || payload.cap > 1)
+              (payload.lastPlayerKeepsPlaying || payload.cap > 1) &&
+              payload.isPublic !== undefined &&
+              typeof payload.isPublic == "boolean"
             ) ||
             wsGame
-          )
+          ) {
             break;
+          }
 
           let playerId = Player.generateId();
 
@@ -46,7 +49,8 @@ wss.on("connection", (ws) => {
             gameId,
             player,
             payload.cap,
-            payload.lastPlayerKeepsPlaying
+            payload.lastPlayerKeepsPlaying,
+            payload.isPublic,
           );
           wsGame = game;
           games.push(game);
@@ -65,8 +69,9 @@ wss.on("connection", (ws) => {
               typeof payload.gameId == "number"
             ) ||
             wsGame
-          )
+          ) {
             break;
+          }
 
           const gameToJoin = games.find((game) => game.id === payload.gameId);
           if (gameToJoin) {
@@ -88,6 +93,21 @@ wss.on("connection", (ws) => {
           }
 
           break;
+        case "search-games":
+          const gamesToSearch = games.filter((g) => g.searchable());
+          const gamesToSend = gamesToSearch.map((game) => ({
+            id: game.id,
+            host: game.host.name,
+            players: game.players.length,
+            cap: game.cap,
+            lastPlayerKeepsPlaying: game.lastPlayerKeepsPlaying,
+          }));
+          ws.send(
+            JSON.stringify({
+              type: "search-games-result",
+              payload: gamesToSend,
+            }),
+          );
         case "add-bot":
           if (wsGame) {
             let botId = Bot.generateId();
@@ -173,12 +193,13 @@ wss.on("connection", (ws) => {
                       item.edition &&
                       typeof item.edition == "string" &&
                       ["knife", "ball", "bazooka", "spiral"].includes(
-                        item.edition
-                      )
+                        item.edition,
+                      ),
                   )))
             )
-          )
+          ) {
             break;
+          }
 
           if (wsGame) {
             wsGame.load({ ...payload, socket: ws });
