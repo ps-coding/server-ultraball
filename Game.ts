@@ -161,7 +161,8 @@ export class Game {
           this.gameStarted &&
           !this.lastPlayerKeepsPlaying) ||
         this.players.filter((p) => !p.bot && !p.isDead).length <= 0 ||
-        this.players.filter((p) => !p.isDead).length <= 1
+        this.players.filter((p) => !p.isDead).length <= 0 ||
+        (this.players.filter((p) => !p.isDead).length <= 1 && this.gameStarted)
       ) {
         this.end("all-left");
         return;
@@ -199,7 +200,8 @@ export class Game {
         this.gameStarted &&
         !this.lastPlayerKeepsPlaying) ||
       this.players.filter((p) => !p.bot && !p.isDead).length <= 0 ||
-      this.players.filter((p) => !p.isDead).length <= 1
+      this.players.filter((p) => !p.isDead).length <= 0 ||
+      (this.players.filter((p) => !p.isDead).length <= 1 && this.gameStarted)
     ) {
       this.end("all-left");
       return;
@@ -485,7 +487,8 @@ export class Game {
       this.players.filter((p) => !p.isDead && !p.bot).length < 1 ||
       (this.players.filter((p) => !p.isDead && !p.bot).length < 2 &&
         !this.lastPlayerKeepsPlaying) ||
-      this.players.filter((p) => !p.isDead).length <= 1
+      this.players.filter((p) => !p.isDead).length <= 0 ||
+      (this.players.filter((p) => !p.isDead).length <= 1 && this.gameStarted)
     ) {
       this.end("all-dead");
     }
