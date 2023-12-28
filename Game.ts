@@ -74,6 +74,12 @@ export class Game {
         this.players.filter((p) => !p.bot).length < 2) ||
       this.gameStarted
     ) {
+      socket.send(
+        JSON.stringify({
+          type: "error",
+          payload: { error: "Player Count Not Enough" },
+        })
+      );
       return;
     }
 
@@ -219,7 +225,15 @@ export class Game {
 
     if (!this.isHost(socket)) return;
 
-    if (this.#loadingMoves.length == 0) return;
+    if (this.#loadingMoves.length == 0) {
+      socket.send(
+        JSON.stringify({
+          type: "error",
+          payload: { error: "No One Has Moved Yet" },
+        })
+      );
+      return;
+    }
 
     this.broadcast("host-skipped", {});
 

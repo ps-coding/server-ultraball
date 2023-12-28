@@ -25,10 +25,17 @@ wss.on("connection", (ws) => {
               typeof payload.lastPlayerKeepsPlaying == "boolean" &&
               (payload.lastPlayerKeepsPlaying || payload.cap > 1) &&
               payload.isPublic !== undefined &&
-              typeof payload.isPublic == "boolean"
+              typeof payload.isPublic == "boolean" &&
+              (!payload.isPublic || payload.cap > 1)
             ) ||
             wsGame
           ) {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Invalid Request" },
+              })
+            );
             break;
           }
 
@@ -50,7 +57,7 @@ wss.on("connection", (ws) => {
             player,
             payload.cap,
             payload.lastPlayerKeepsPlaying,
-            payload.isPublic,
+            payload.isPublic
           );
           wsGame = game;
           games.push(game);
@@ -70,6 +77,12 @@ wss.on("connection", (ws) => {
             ) ||
             wsGame
           ) {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Invalid Request" },
+              })
+            );
             break;
           }
 
@@ -90,6 +103,13 @@ wss.on("connection", (ws) => {
             if (wsGame.gameEnded) {
               games.splice(games.indexOf(wsGame), 1);
             }
+          } else {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Game Not Found" },
+              })
+            );
           }
 
           break;
@@ -106,7 +126,7 @@ wss.on("connection", (ws) => {
             JSON.stringify({
               type: "available-games-found",
               payload: { availableGames: gamesToSend },
-            }),
+            })
           );
         case "add-bot":
           if (wsGame) {
@@ -127,7 +147,15 @@ wss.on("connection", (ws) => {
 
           break;
         case "leave-game":
-          if (!(payload.playerId && typeof payload.playerId == "number")) break;
+          if (!(payload.playerId && typeof payload.playerId == "number")) {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Invalid Request" },
+              })
+            );
+            break;
+          }
 
           if (wsGame) {
             wsGame.removePlayer(payload.playerId, ws);
@@ -140,7 +168,15 @@ wss.on("connection", (ws) => {
           break;
 
         case "kick-out":
-          if (!(payload.playerId && typeof payload.playerId == "number")) break;
+          if (!(payload.playerId && typeof payload.playerId == "number")) {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Invalid Request" },
+              })
+            );
+            break;
+          }
 
           if (wsGame) {
             wsGame.removePlayer(payload.playerId, ws);
@@ -193,11 +229,17 @@ wss.on("connection", (ws) => {
                       item.edition &&
                       typeof item.edition == "string" &&
                       ["knife", "ball", "bazooka", "spiral"].includes(
-                        item.edition,
-                      ),
+                        item.edition
+                      )
                   )))
             )
           ) {
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: { error: "Invalid Request" },
+              })
+            );
             break;
           }
 
