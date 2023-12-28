@@ -155,6 +155,10 @@ export class Game {
         removedPlayerId: playerId,
       });
       this.players = this.players.filter((p) => p.id != playerId);
+      this.broadcast("player-removed-update", {
+        reason: "host-kicked",
+        removedPlayerId: playerId,
+      });
 
       if (
         (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
@@ -195,6 +199,10 @@ export class Game {
     this.players = this.players.filter(
       (p) => p.id != playerId && p.socket != socket
     );
+    this.broadcast("player-removed-update", {
+      reason: "host-kicked",
+      removedPlayerId: playerId,
+    });
 
     if (
       (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
