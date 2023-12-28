@@ -150,11 +150,11 @@ export class Game {
 
       if (this.players.filter((p) => p.id == playerId).length != 1) return;
 
-      this.players = this.players.filter((p) => p.id != playerId);
       this.broadcast("player-removed", {
         reason: "host-kicked",
         removedPlayerId: playerId,
       });
+      this.players = this.players.filter((p) => p.id != playerId);
 
       if (
         (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
@@ -187,13 +187,14 @@ export class Game {
 
     const player = this.findPlayer(playerId, socket);
     if (!player) return;
-    this.players = this.players.filter(
-      (p) => p.id != playerId && p.socket != socket
-    );
+
     this.broadcast("player-removed", {
       reason: "left",
       removedPlayerId: playerId,
     });
+    this.players = this.players.filter(
+      (p) => p.id != playerId && p.socket != socket
+    );
 
     if (
       (this.players.filter((p) => !p.bot && !p.isDead).length <= 1 &&
