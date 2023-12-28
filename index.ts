@@ -135,7 +135,8 @@ wss.on("connection", (ws) => {
           const gamesToSend = gamesToSearch.map((game) => ({
             id: game.id,
             host: game.host.name,
-            players: game.players.length,
+            players: game.players.filter((p) => !p.bot).length,
+            bots: game.players.filter((p) => p.bot).length,
             cap: game.cap,
             lastPlayerKeepsPlaying: game.lastPlayerKeepsPlaying,
           }));
