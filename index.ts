@@ -87,7 +87,24 @@ wss.on("connection", (ws) => {
           }
 
           const gameToJoin = games.find((game) => game.id === payload.gameId);
+
           if (gameToJoin) {
+            if (
+              gameToJoin.players.filter((p) => !p.bot).length >=
+                gameToJoin.cap ||
+              gameToJoin.cap <= 1 ||
+              gameToJoin.gameStarted ||
+              gameToJoin.gameEnded
+            ) {
+              ws.send(
+                JSON.stringify({
+                  type: "error",
+                  payload: { error: "Game Full" },
+                })
+              );
+              break;
+            }
+
             let playerId = Player.generateId();
             while (
               gameToJoin.players.find((player) => player.id === playerId) ||
