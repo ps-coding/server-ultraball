@@ -200,7 +200,7 @@ export class Game {
       (p) => p.id != playerId && p.socket != socket
     );
     this.broadcast("player-removed-update", {
-      reason: "host-kicked",
+      reason: "left",
       removedPlayerId: playerId,
     });
 
