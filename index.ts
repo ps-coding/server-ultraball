@@ -104,8 +104,8 @@ wss.on("connection", (ws) => {
           }));
           ws.send(
             JSON.stringify({
-              type: "search-games-result",
-              payload: gamesToSend,
+              type: "available-games-found",
+              payload: { availableGames: gamesToSend },
             }),
           );
         case "add-bot":
