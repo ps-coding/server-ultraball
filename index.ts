@@ -299,5 +299,7 @@ wss.on("connection", (ws) => {
         }
       }
     }
+
+    ws.close();
   });
 });

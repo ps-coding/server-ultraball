@@ -143,8 +143,9 @@ export class Game {
   removePlayer(playerId: number, socket: WebSocket) {
     if (this.isHost(socket)) {
       if (this.host.id == playerId) {
-        this.players = this.players.filter((p) => p.id != playerId);
         this.end("host-left");
+        this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+        this.players = this.players.filter((p) => p.id != playerId);
         return;
       }
 
@@ -154,6 +155,7 @@ export class Game {
         reason: "host-kicked",
         removedPlayerId: playerId,
       });
+      this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
       this.players = this.players.filter((p) => p.id != playerId);
       this.broadcast("player-removed-update", {
         reason: "host-kicked",
@@ -196,6 +198,7 @@ export class Game {
       reason: "left",
       removedPlayerId: playerId,
     });
+    this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
     this.players = this.players.filter(
       (p) => p.id != playerId && p.socket != socket
     );
