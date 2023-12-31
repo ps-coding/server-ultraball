@@ -32,7 +32,7 @@ export class Game {
     host: Player,
     cap: number,
     lastPlayerKeepsPlaying: boolean,
-    isPublic: boolean
+    isPublic: boolean,
   ) {
     this.id = id;
     this.host = host;
@@ -78,7 +78,7 @@ export class Game {
         JSON.stringify({
           type: "error",
           payload: { error: "Player Count Not Enough" },
-        })
+        }),
       );
       return;
     }
@@ -93,7 +93,7 @@ export class Game {
 
   findPlayer(playerId: number, socket: WebSocket) {
     const results = this.players.filter(
-      (p) => p.id == playerId && p.socket == socket
+      (p) => p.id == playerId && p.socket == socket,
     );
 
     return results.length == 1 ? results[0] : undefined;
@@ -144,7 +144,12 @@ export class Game {
     if (this.isHost(socket)) {
       if (this.host.id == playerId) {
         this.end("host-left");
-        this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+        if (
+          this.players.filter((p) => p.id == playerId)[0].socket &&
+          !this.players.filter((p) => p.id == playerId)[0].bot
+        ) {
+          this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+        }
         this.players = this.players.filter((p) => p.id != playerId);
         return;
       }
@@ -155,7 +160,12 @@ export class Game {
         reason: "host-kicked",
         removedPlayerId: playerId,
       });
-      this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+      if (
+        this.players.filter((p) => p.id == playerId)[0].socket &&
+        !this.players.filter((p) => p.id == playerId)[0].bot
+      ) {
+        this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+      }
       this.players = this.players.filter((p) => p.id != playerId);
       this.broadcast("player-removed-update", {
         reason: "host-kicked",
@@ -175,13 +185,13 @@ export class Game {
       }
 
       this.#loadingMoves = this.#loadingMoves.filter(
-        (a) => a.playerId != playerId
+        (a) => a.playerId != playerId,
       );
       this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
       if (
         this.#loadingMoves.length ==
-        this.players.filter((p) => !p.isDead && !p.bot).length
+          this.players.filter((p) => !p.isDead && !p.bot).length
       ) {
         this.move();
         this.#loadingMoves = [];
@@ -198,9 +208,14 @@ export class Game {
       reason: "left",
       removedPlayerId: playerId,
     });
-    this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+    if (
+      this.players.filter((p) => p.id == playerId)[0].socket &&
+      !this.players.filter((p) => p.id == playerId)[0].bot
+    ) {
+      this.players.filter((p) => p.id == playerId)[0].socket.close(1000);
+    }
     this.players = this.players.filter(
-      (p) => p.id != playerId && p.socket != socket
+      (p) => p.id != playerId && p.socket != socket,
     );
     this.broadcast("player-removed-update", {
       reason: "left",
@@ -220,13 +235,13 @@ export class Game {
     }
 
     this.#loadingMoves = this.#loadingMoves.filter(
-      (a) => a.playerId != playerId
+      (a) => a.playerId != playerId,
     );
     this.playersMoved = this.playersMoved.filter((id) => id != playerId);
 
     if (
       this.#loadingMoves.length ==
-      this.players.filter((p) => !p.isDead && !p.bot).length
+        this.players.filter((p) => !p.isDead && !p.bot).length
     ) {
       this.move();
       this.#loadingMoves = [];
@@ -244,7 +259,7 @@ export class Game {
         JSON.stringify({
           type: "error",
           payload: { error: "No One Has Moved Yet" },
-        })
+        }),
       );
       return;
     }
@@ -285,7 +300,7 @@ export class Game {
 
     if (
       this.#loadingMoves.length ==
-      this.players.filter((p) => !p.isDead && !p.bot).length
+        this.players.filter((p) => !p.isDead && !p.bot).length
     ) {
       this.move();
       this.#loadingMoves = [];
@@ -307,7 +322,7 @@ export class Game {
         const action = a[0];
         const theAction = moves.filter((m) => m.id == action.moveId);
         const theDirection = this.players.filter(
-          (p) => p.id == action.direction
+          (p) => p.id == action.direction,
         );
 
         if (theAction.length == 1) {
@@ -372,7 +387,7 @@ export class Game {
         } else {
           if (
             player.reloads[player.move.action.needs.edition] >=
-            player.move.action.needs.amount
+              player.move.action.needs.amount
           ) {
             player.reloads[player.move.action.needs.edition] -=
               player.move.action.needs.amount;
@@ -412,7 +427,7 @@ export class Game {
 
               if (
                 (player.move.action.beats as unknown as string[]).includes(
-                  pl.move.action.id
+                  pl.move.action.id,
                 )
               ) {
                 pl.isDead = true;
@@ -422,7 +437,7 @@ export class Game {
             } else if (pl.move.action.method == "defense") {
               if (
                 (pl.move.action.penetrates as unknown as string[]).includes(
-                  player.move.action.id
+                  player.move.action.id,
                 )
               ) {
                 pl.isDead = true;
@@ -430,7 +445,7 @@ export class Game {
             } else if (pl.move.action.method == "defense-offense") {
               if (
                 (pl.move.action.reflects as unknown as string[]).includes(
-                  player.move.action.id
+                  player.move.action.id,
                 )
               ) {
                 player.isDead = true;
@@ -461,7 +476,7 @@ export class Game {
 
             if (
               (player.move.action.beats as unknown as string[]).includes(
-                pl.move.action.id
+                pl.move.action.id,
               )
             ) {
               pl.isDead = true;
@@ -471,7 +486,7 @@ export class Game {
           } else if (pl.move.action.method == "defense") {
             if (
               (pl.move.action.penetrates as unknown as string[]).includes(
-                player.move.action.id
+                player.move.action.id,
               )
             ) {
               pl.isDead = true;
@@ -479,7 +494,7 @@ export class Game {
           } else if (pl.move.action.method == "defense-offense") {
             if (
               (pl.move.action.reflects as unknown as string[]).includes(
-                player.move.action.id
+                player.move.action.id,
               )
             ) {
               player.isDead = true;
@@ -520,7 +535,9 @@ export class Game {
     this.broadcast("game-ended", { reason });
 
     for (const player of this.players.filter((p) => !p.bot)) {
-      player.socket.close(1000);
+      if (player.socket) {
+        player.socket.close(1000);
+      }
     }
   }
 
@@ -647,7 +664,7 @@ export class Move {
         amount: number;
         edition: "knife" | "ball" | "bazooka" | "spiral";
       }[];
-    }
+    },
   ) {
     this.action = action;
 
