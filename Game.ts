@@ -293,6 +293,26 @@ export class Game {
       return;
     }
 
+    const move = moves.find((m) => m.id == action.moveId);
+
+    if (move?.dir == "one") {
+      if (!this.players.find((p) => p.id == action.direction)) return;
+    } else {
+      action.direction = undefined;
+    }
+
+    if (move?.method == "offense" && move?.needs?.edition == "any") {
+      if (!action.using) return;
+      if (action.using.length == 0) return;
+      for (const use of action.using) {
+        if (!["knife", "ball", "bazooka", "spiral"].includes(use.edition)) {
+          return;
+        }
+      }
+    } else {
+      action.using = undefined;
+    }
+
     this.#loadingMoves.push(action);
     this.playersMoved.push(action.playerId);
 
