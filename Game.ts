@@ -603,7 +603,11 @@ export class Bot extends Player {
   id: number;
   name: string;
   isDead = false;
+
   readonly bot = true;
+  botType: "normal" | "friendly" | "enemy";
+  botPersonality: "normal" | "aggressive" | "defensive";
+
   move?: Move;
   reloads = {
     knife: 0,
@@ -617,24 +621,87 @@ export class Bot extends Player {
   }
 
   constructor(id: number) {
-    super(id, "Bot #" + id, undefined as unknown as WebSocket);
+    const theType = ["normal", "friendly", "enemy"][
+      Math.floor(Math.random() * 3)
+    ] as "normal" | "friendly" | "enemy";
+
+    const thePersonality = ["normal", "aggressive", "defensive"][
+      Math.floor(Math.random() * 3)
+    ] as "normal" | "aggressive" | "defensive";
+
+    const botName =
+      theType.charAt(0).toUpperCase() +
+      theType.slice(1).toLowerCase() +
+      "-" +
+      thePersonality.charAt(0).toUpperCase() +
+      theType.slice(1).toLowerCase() +
+      " Bot";
+
+    super(id, botName, undefined as unknown as WebSocket);
+
     this.id = id;
-    this.name = "Bot #" + id;
+    this.name = botName;
+    this.botType = theType;
+    this.botPersonality = thePersonality;
   }
 
   chooseRandomMove(players: Player[]) {
     const availableMoves = this.getAvailableMoves();
 
-    const move =
-      availableMoves[Math.floor(Math.random() * availableMoves.length)];
+    let move;
 
-    if (move.dir == "all" || move.dir == "self") {
-      this.move = new Move(move, {});
+    if (this.botPersonality == "normal") {
+      move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+    } else if (this.botPersonality == "aggressive") {
+      const offensiveMoves = availableMoves.filter(
+        (m) => m.method == "offense"
+      );
+      const reloadMoves = availableMoves.filter((m) => m.method == "reload");
+
+      const goOffensive = Math.random() < 0.5;
+
+      move = goOffensive
+        ? offensiveMoves[Math.floor(Math.random() * offensiveMoves.length)]
+        : reloadMoves[Math.floor(Math.random() * reloadMoves.length)];
     } else {
-      const options = players.filter((p) => !p.isDead && p.id != this.id);
-      const direction = options[Math.floor(Math.random() * options.length)];
+      const defensiveMoves = availableMoves.filter(
+        (m) => m.method == "defense" || m.method == "defense-offense"
+      );
 
-      this.move = new Move(move, { direction });
+      move = defensiveMoves[Math.floor(Math.random() * defensiveMoves.length)];
+    }
+
+    if (this.botType == "normal") {
+      if (move.dir == "all" || move.dir == "self") {
+        this.move = new Move(move, {});
+      } else {
+        const options = players.filter((p) => !p.isDead && p.id != this.id);
+        const direction = options[Math.floor(Math.random() * options.length)];
+
+        this.move = new Move(move, { direction });
+      }
+    } else if (this.botType == "friendly") {
+      if (move.dir == "all" || move.dir == "self") {
+        this.move = new Move(move, {});
+      } else {
+        const options = players.filter(
+          (p) => !p.isDead && p.id != this.id && p.bot
+        );
+        const direction = options[Math.floor(Math.random() * options.length)];
+
+        this.move = new Move(move, { direction });
+      }
+    } else {
+      if (move.dir == "all" || move.dir == "self") {
+        this.move = new Move(move, {});
+      } else {
+        const options = players.filter(
+          (p) => !p.isDead && p.id != this.id && !p.bot
+        );
+        const direction = options[Math.floor(Math.random() * options.length)];
+
+        this.move = new Move(move, { direction });
+      }
     }
   }
 
