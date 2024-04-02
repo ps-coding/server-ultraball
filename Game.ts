@@ -634,7 +634,7 @@ export class Bot extends Player {
       theType.slice(1).toLowerCase() +
       "-" +
       thePersonality.charAt(0).toUpperCase() +
-      theType.slice(1).toLowerCase() +
+      thePersonality.slice(1).toLowerCase() +
       " Bot";
 
     super(id, botName, undefined as unknown as WebSocket);
@@ -687,9 +687,14 @@ export class Bot extends Player {
         const options = players.filter(
           (p) => !p.isDead && p.id != this.id && p.bot
         );
-        const direction = options[Math.floor(Math.random() * options.length)];
 
-        this.move = new Move(move, { direction });
+        if (options.length > 0) {
+          const direction = options[Math.floor(Math.random() * options.length)];
+
+          this.move = new Move(move, { direction });
+        } else {
+          this.move = undefined;
+        }
       }
     } else {
       if (move.dir == "all" || move.dir == "self") {
