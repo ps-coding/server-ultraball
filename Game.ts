@@ -646,9 +646,7 @@ export class Bot extends Player {
   }
 
   chooseRandomMove(players: Player[]) {
-    const availableMoves = this.getAvailableMoves().filter(
-      (m) => m.id != "mask"
-    );
+    const availableMoves = this.getAvailableMoves();
 
     let move;
 
@@ -721,7 +719,8 @@ export class Bot extends Player {
           (move.method == "offense" &&
             move.needs?.edition != "any" &&
             !this.hasEnoughReloads(move.needs)) ||
-          (move.method == "offense" && move.needs?.edition == "any")
+          (move.method == "offense" && move.needs?.edition == "any") ||
+          move.id == "mask"
         )
       ) {
         availableMoves.push(move);
