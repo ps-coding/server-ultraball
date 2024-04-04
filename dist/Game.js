@@ -555,7 +555,8 @@ export class Bot extends Player {
             if (!((move.method == "offense" &&
                 ((_a = move.needs) === null || _a === void 0 ? void 0 : _a.edition) != "any" &&
                 !this.hasEnoughReloads(move.needs)) ||
-                (move.method == "offense" && ((_b = move.needs) === null || _b === void 0 ? void 0 : _b.edition) == "any"))) {
+                (move.method == "offense" && ((_b = move.needs) === null || _b === void 0 ? void 0 : _b.edition) == "any") ||
+                move.id == "mask")) {
                 availableMoves.push(move);
             }
         }
