@@ -646,7 +646,9 @@ export class Bot extends Player {
   }
 
   chooseRandomMove(players: Player[]) {
-    const availableMoves = this.getAvailableMoves();
+    const availableMoves = this.getAvailableMoves().filter(
+      (m) => m.id != "mask"
+    );
 
     let move;
 
