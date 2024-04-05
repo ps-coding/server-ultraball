@@ -605,8 +605,8 @@ export class Bot extends Player {
   isDead = false;
 
   readonly bot = true;
-  botType: "normal" | "friendly" | "enemy";
-  botPersonality: "normal" | "aggressive" | "defensive";
+  #botType: "normal" | "friendly" | "enemy";
+  #botPersonality: "normal" | "aggressive" | "defensive";
 
   move?: Move;
   reloads = {
@@ -629,20 +629,14 @@ export class Bot extends Player {
       Math.floor(Math.random() * 3)
     ] as "normal" | "aggressive" | "defensive";
 
-    const botName =
-      theType.charAt(0).toUpperCase() +
-      theType.slice(1).toLowerCase() +
-      "-" +
-      thePersonality.charAt(0).toUpperCase() +
-      thePersonality.slice(1).toLowerCase() +
-      " Bot";
+    const botName = botNames[Math.floor(Math.random() * botNames.length)];
 
     super(id, botName, undefined as unknown as WebSocket);
 
     this.id = id;
     this.name = botName;
-    this.botType = theType;
-    this.botPersonality = thePersonality;
+    this.#botType = theType;
+    this.#botPersonality = thePersonality;
   }
 
   chooseRandomMove(players: Player[]) {
@@ -650,9 +644,9 @@ export class Bot extends Player {
 
     let move;
 
-    if (this.botPersonality == "normal") {
+    if (this.#botPersonality == "normal") {
       move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-    } else if (this.botPersonality == "aggressive") {
+    } else if (this.#botPersonality == "aggressive") {
       const offensiveMoves = availableMoves.filter(
         (m) => m.method == "offense"
       );
@@ -671,7 +665,7 @@ export class Bot extends Player {
       move = defensiveMoves[Math.floor(Math.random() * defensiveMoves.length)];
     }
 
-    if (this.botType == "normal") {
+    if (this.#botType == "normal") {
       if (move.dir == "all" || move.dir == "self") {
         this.move = new Move(move, {});
       } else {
@@ -680,7 +674,7 @@ export class Bot extends Player {
 
         this.move = new Move(move, { direction });
       }
-    } else if (this.botType == "friendly") {
+    } else if (this.#botType == "friendly") {
       if (move.dir == "all" || move.dir == "self") {
         this.move = new Move(move, {});
       } else {
@@ -902,3 +896,106 @@ export const moves = [
     dir: "self",
   },
 ] as const;
+
+const botNames = [
+  "Rey Wang",
+  "Valentino Watson",
+  "Aniyah Schultz",
+  "Jadon Hendricks",
+  "Emelia Wiggins",
+  "Paola Soto",
+  "Khloe Lawson",
+  "Justine Grimes",
+  "Sage Foster",
+  "Tessa Chaney",
+  "Frederick Harrington",
+  "Melissa Johns",
+  "Winston Randolph",
+  "Jamison Wagner",
+  "Izabelle Graham",
+  "Kali Phelps",
+  "Calvin Adams",
+  "Magdalena Dennis",
+  "Olivia Cunningham",
+  "Iris Bradford",
+  "Damian Patton",
+  "Stephany Salinas",
+  "Mariam Dunn",
+  "Danika Sanders",
+  "Kolby Wall",
+  "Tristan Callahan",
+  "Dangelo Silva",
+  "Seamus Bender",
+  "Julianna Thornton",
+  "Abbigail Stanton",
+  "Ryan Leon",
+  "Emmett Rosales",
+  "Tucker Boyer",
+  "Ariella Everett",
+  "Jayla Weiss",
+  "Jaida Compton",
+  "Rashad Pearson",
+  "Frankie Colon",
+  "Charlie Cameron",
+  "Braylon Carrillo",
+  "Jaycee Foster",
+  "Fletcher Ortega",
+  "Kristina Cain",
+  "Marley Mcintyre",
+  "Harper Pena",
+  "Jaydan Avery",
+  "Aron Powell",
+  "Clayton Hall",
+  "Adrian Nelson",
+  "Cloe Gibson",
+  "Tommy Mckinney",
+  "Carley Stafford",
+  "Deborah Krause",
+  "Logan Farley",
+  "Abel Howell",
+  "Shamar Esparza",
+  "Lily Case",
+  "Kaleigh Christian",
+  "Moises Guerra",
+  "Lillie Hansen",
+  "Carla Glover",
+  "Jaron Kirk",
+  "Keyon Hardy",
+  "Kelly Higgins",
+  "Josh Ibarra",
+  "Kelvin Elliott",
+  "Raiden Cooper",
+  "Kinley Cain",
+  "Gaven Nolan",
+  "Ali Bender",
+  "Sam Lambert",
+  "Sergio Barajas",
+  "Kaleb Mckenzie",
+  "Tristan Mccarty",
+  "Yareli Barr",
+  "Sean Cunningham",
+  "Aleena Silva",
+  "Kayden Barry",
+  "Bailey Baxter",
+  "Mikayla Price",
+  "Giselle Oneal",
+  "Richard Brooks",
+  "Landon Lucas",
+  "Tony Werner",
+  "Sara Baldwin",
+  "Charlize Huffman",
+  "Zane Zhang",
+  "Kolten Daniel",
+  "Devan Montgomery",
+  "Erin Short",
+  "Desiree Potts",
+  "Darion Cobb",
+  "Mike Monroe",
+  "Cierra Colon",
+  "Kinsley Wiggins",
+  "Dayton Bonilla",
+  "Uriah Bird",
+  "Sincere Stanley",
+  "Nathaly Ortega",
+  "Tatum Whitney",
+];

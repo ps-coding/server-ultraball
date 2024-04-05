@@ -9,7 +9,7 @@ var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var _Game_loadingMoves;
+var _Game_loadingMoves, _Bot_botType, _Bot_botPersonality;
 import { JSONDecycle } from "./cycle.js";
 export class Game {
     static generateId() {
@@ -474,15 +474,12 @@ export class Bot extends Player {
     constructor(id) {
         const theType = ["normal", "friendly", "enemy"][Math.floor(Math.random() * 3)];
         const thePersonality = ["normal", "aggressive", "defensive"][Math.floor(Math.random() * 3)];
-        const botName = theType.charAt(0).toUpperCase() +
-            theType.slice(1).toLowerCase() +
-            "-" +
-            thePersonality.charAt(0).toUpperCase() +
-            thePersonality.slice(1).toLowerCase() +
-            " Bot";
+        const botName = botNames[Math.floor(Math.random() * botNames.length)];
         super(id, botName, undefined);
         this.isDead = false;
         this.bot = true;
+        _Bot_botType.set(this, void 0);
+        _Bot_botPersonality.set(this, void 0);
         this.reloads = {
             knife: 0,
             ball: 0,
@@ -491,16 +488,16 @@ export class Bot extends Player {
         };
         this.id = id;
         this.name = botName;
-        this.botType = theType;
-        this.botPersonality = thePersonality;
+        __classPrivateFieldSet(this, _Bot_botType, theType, "f");
+        __classPrivateFieldSet(this, _Bot_botPersonality, thePersonality, "f");
     }
     chooseRandomMove(players) {
         const availableMoves = this.getAvailableMoves();
         let move;
-        if (this.botPersonality == "normal") {
+        if (__classPrivateFieldGet(this, _Bot_botPersonality, "f") == "normal") {
             move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
         }
-        else if (this.botPersonality == "aggressive") {
+        else if (__classPrivateFieldGet(this, _Bot_botPersonality, "f") == "aggressive") {
             const offensiveMoves = availableMoves.filter((m) => m.method == "offense");
             const reloadMoves = availableMoves.filter((m) => m.method == "reload");
             const goOffensive = Math.random() < 0.5;
@@ -512,7 +509,7 @@ export class Bot extends Player {
             const defensiveMoves = availableMoves.filter((m) => m.method == "defense" || m.method == "defense-offense");
             move = defensiveMoves[Math.floor(Math.random() * defensiveMoves.length)];
         }
-        if (this.botType == "normal") {
+        if (__classPrivateFieldGet(this, _Bot_botType, "f") == "normal") {
             if (move.dir == "all" || move.dir == "self") {
                 this.move = new Move(move, {});
             }
@@ -522,7 +519,7 @@ export class Bot extends Player {
                 this.move = new Move(move, { direction });
             }
         }
-        else if (this.botType == "friendly") {
+        else if (__classPrivateFieldGet(this, _Bot_botType, "f") == "friendly") {
             if (move.dir == "all" || move.dir == "self") {
                 this.move = new Move(move, {});
             }
@@ -571,6 +568,7 @@ export class Bot extends Player {
         return true;
     }
 }
+_Bot_botType = new WeakMap(), _Bot_botPersonality = new WeakMap();
 export class Move {
     constructor(action, options) {
         var _a;
@@ -713,4 +711,106 @@ export const moves = [
         amount: 1,
         dir: "self",
     },
+];
+const botNames = [
+    "Rey Wang",
+    "Valentino Watson",
+    "Aniyah Schultz",
+    "Jadon Hendricks",
+    "Emelia Wiggins",
+    "Paola Soto",
+    "Khloe Lawson",
+    "Justine Grimes",
+    "Sage Foster",
+    "Tessa Chaney",
+    "Frederick Harrington",
+    "Melissa Johns",
+    "Winston Randolph",
+    "Jamison Wagner",
+    "Izabelle Graham",
+    "Kali Phelps",
+    "Calvin Adams",
+    "Magdalena Dennis",
+    "Olivia Cunningham",
+    "Iris Bradford",
+    "Damian Patton",
+    "Stephany Salinas",
+    "Mariam Dunn",
+    "Danika Sanders",
+    "Kolby Wall",
+    "Tristan Callahan",
+    "Dangelo Silva",
+    "Seamus Bender",
+    "Julianna Thornton",
+    "Abbigail Stanton",
+    "Ryan Leon",
+    "Emmett Rosales",
+    "Tucker Boyer",
+    "Ariella Everett",
+    "Jayla Weiss",
+    "Jaida Compton",
+    "Rashad Pearson",
+    "Frankie Colon",
+    "Charlie Cameron",
+    "Braylon Carrillo",
+    "Jaycee Foster",
+    "Fletcher Ortega",
+    "Kristina Cain",
+    "Marley Mcintyre",
+    "Harper Pena",
+    "Jaydan Avery",
+    "Aron Powell",
+    "Clayton Hall",
+    "Adrian Nelson",
+    "Cloe Gibson",
+    "Tommy Mckinney",
+    "Carley Stafford",
+    "Deborah Krause",
+    "Logan Farley",
+    "Abel Howell",
+    "Shamar Esparza",
+    "Lily Case",
+    "Kaleigh Christian",
+    "Moises Guerra",
+    "Lillie Hansen",
+    "Carla Glover",
+    "Jaron Kirk",
+    "Keyon Hardy",
+    "Kelly Higgins",
+    "Josh Ibarra",
+    "Kelvin Elliott",
+    "Raiden Cooper",
+    "Kinley Cain",
+    "Gaven Nolan",
+    "Ali Bender",
+    "Sam Lambert",
+    "Sergio Barajas",
+    "Kaleb Mckenzie",
+    "Tristan Mccarty",
+    "Yareli Barr",
+    "Sean Cunningham",
+    "Aleena Silva",
+    "Kayden Barry",
+    "Bailey Baxter",
+    "Mikayla Price",
+    "Giselle Oneal",
+    "Richard Brooks",
+    "Landon Lucas",
+    "Tony Werner",
+    "Sara Baldwin",
+    "Charlize Huffman",
+    "Zane Zhang",
+    "Kolten Daniel",
+    "Devan Montgomery",
+    "Erin Short",
+    "Desiree Potts",
+    "Darion Cobb",
+    "Mike Monroe",
+    "Cierra Colon",
+    "Kinsley Wiggins",
+    "Dayton Bonilla",
+    "Uriah Bird",
+    "Sincere Stanley",
+    "Nathaly Ortega",
+    "Tatum Whitney",
 ];
