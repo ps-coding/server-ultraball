@@ -15,7 +15,7 @@
   "author": "ps-coding <prasham31@gmail.com> (https://shahprasham.com/)",
   "license": "ISC",
   "dependencies": {
-    "ws": "^8.13.0"
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "@types/ws": "^8.5.5",
